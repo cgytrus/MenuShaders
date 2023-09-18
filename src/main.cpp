@@ -348,7 +348,7 @@ public:
                 log::warn("failed to find node with id '{}'", id);
                 continue;
             }
-            auto pos = node->convertToWorldSpace(CCPoint{0.f, 0.f});
+            auto pos = node->convertToWorldSpaceAR(CCPoint{0.f, 0.f});
             glUniform2f(posLoc, pos.x, pos.y);
             glUniform2f(sizeLoc, node->getContentSize().width, node->getContentSize().height);
             if (!rotLoc && !scaleLoc && !visibleLoc)
