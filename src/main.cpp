@@ -192,6 +192,8 @@ public:
             if (!line.empty()) addSprite(line);
         }
 
+        GameSoundManager::get()->enableMetering();
+
         auto engine = FMODAudioEngine::sharedEngine();
         engine->m_system->createDSPByType(FMOD_DSP_TYPE_FFT, &m_fftDsp);
         engine->m_globalChannel->addDSP(1, m_fftDsp);
