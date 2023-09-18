@@ -316,7 +316,6 @@ public:
     void draw() override {
         glBindVertexArray(m_vao);
 
-        ccGLEnable(m_eGLServerState);
         ccGLUseProgram(m_shader.program);
 
         auto glv = CCDirector::sharedDirector()->getOpenGLView();
@@ -349,7 +348,7 @@ public:
                 log::warn("failed to find node with id '{}'", id);
                 continue;
             }
-            auto pos = node->convertToWorldSpaceAR(CCPoint{0.f, 0.f});
+            auto pos = node->convertToWorldSpace(CCPoint{0.f, 0.f});
             glUniform2f(posLoc, pos.x, pos.y);
             glUniform2f(sizeLoc, node->getContentSize().width, node->getContentSize().height);
             if (!rotLoc && !scaleLoc && !visibleLoc)
@@ -363,7 +362,10 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         glBindVertexArray(0);
+
+#ifndef GEODE_IS_MACOS
         CC_INCREMENT_GL_DRAWS(1);
+#endif
     }
 
     static auto create(const std::string& vert, const std::string& frag) {
