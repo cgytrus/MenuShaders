@@ -1,4 +1,4 @@
-﻿#version 120
+#version 120
 
 /*
 Here's an extremely simple shader that just shows the uv,
