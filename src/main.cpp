@@ -279,11 +279,12 @@ public:
         ccGLUseProgram(m_shader.program);
 
         auto glv = CCDirector::sharedDirector()->getOpenGLView();
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
         auto frSize = glv->getFrameSize();
 
         glUniform2f(m_uniformResolution, frSize.width, frSize.height);
-        const auto mousePos = glv->getMousePosition();
-        glUniform2f(m_uniformMouse, mousePos.x, frSize.height - mousePos.y);
+        auto mousePos = cocos::getMousePos() / winSize * frSize;
+        glUniform2f(m_uniformMouse, mousePos.x, mousePos.y);
 
         for (size_t i = 0; i < m_shaderSprites.size(); ++i) {
             auto sprite = m_shaderSprites[i];
