@@ -127,6 +127,7 @@ class ShaderNode : public CCNode {
     GLint m_uniformPulse2 = 0;
     GLint m_uniformPulse3 = 0;
     GLint m_uniformFft = 0;
+    std::vector<std::tuple<std::string, CCNode*, GLint, GLint, GLint, GLint, GLint>> m_uniformNodes;
     float m_time = 0.f;
     FMOD::DSP* m_fftDsp = nullptr;
     static constexpr int FFT_SPECTRUM_SIZE = 1024;
@@ -173,23 +174,46 @@ public:
         ccGLUseProgram(m_shader.program);
 
         m_shaderSprites.inner()->retain();
-        if (frag.size() > 3 && frag.compare(0, 3, "//@") == 0) {
-            std::istringstream stream(frag);
-            stream.seekg(4);
-            std::string line;
-            std::getline(stream, line);
-            std::string::size_type pos;
-            const auto addSprite = [&](const std::string& name) {
-                auto sprite = CCSprite::create(name.c_str());
-                sprite->retain();
-                m_shaderSprites.push_back(sprite);
-            };
-            while (pos = line.find(','), pos != std::string::npos) {
-                auto me = line.substr(0, pos);
-                line = line.substr(pos + 1);
-                addSprite(me);
+        std::istringstream stream(frag);
+        std::string line;
+        while (std::getline(stream, line)) {
+            if (line.starts_with("//@")) {
+                line = utils::string::trim(line.substr(3));
+                const auto addSprite = [&](const std::string& name) {
+                    auto sprite = CCSprite::create(name.c_str());
+                    sprite->retain();
+                    m_shaderSprites.push_back(sprite);
+                };
+                std::string::size_type pos;
+                while (pos = line.find(','), pos != std::string::npos) {
+                    auto me = line.substr(0, pos);
+                    line = line.substr(pos + 1);
+                    addSprite(me);
+                }
+                if (!line.empty())
+                    addSprite(line);
             }
-            if (!line.empty()) addSprite(line);
+            if (line.starts_with("//#")) {
+                line = utils::string::trim(line.substr(3));
+                size_t index = 0;
+                const auto addNode = [&](const std::string& id) {
+                    auto n = "node" + std::to_string(index++);
+                    auto pos = glGetUniformLocation(m_shader.program, (n + "Pos").c_str());
+                    auto rot = glGetUniformLocation(m_shader.program, (n + "Rot").c_str());
+                    auto scale = glGetUniformLocation(m_shader.program, (n + "Scale").c_str());
+                    auto size = glGetUniformLocation(m_shader.program, (n + "Size").c_str());
+                    auto visible = glGetUniformLocation(m_shader.program, (n + "Visible").c_str());
+                    m_uniformNodes.emplace_back(id, nullptr, pos, rot, scale, size, visible);
+                };
+                std::string::size_type pos;
+                while (pos = line.find(','), pos != std::string::npos) {
+                    auto me = line.substr(0, pos);
+                    line = line.substr(pos + 1);
+                    addNode(me);
+                }
+                if (!line.empty())
+                    addNode(line);
+            }
         }
 
         GameSoundManager::get()->enableMetering();
@@ -274,6 +298,21 @@ public:
         }
     }
 
+    static std::tuple<float, float, float, bool> getStuffRecursive(CCNode* node) {
+        auto parent = node->getParent();
+        if (!parent)
+            return std::make_tuple(
+                node->getRotation(),
+                node->getScaleX(), node->getScaleY(),
+                node->isVisible()
+            );
+        auto [parRot, parScaleX, parScaleY, parVis] = getStuffRecursive(parent);
+        return std::make_tuple(
+            parRot + node->getRotation(),
+            parScaleX * node->getScaleX(), parScaleY * node->getScaleY(),
+            parVis && node->isVisible()
+        );
+    }
     void draw() override {
         glBindVertexArray(m_vao);
 
@@ -302,6 +341,24 @@ public:
         glUniform1f(m_uniformPulse3, engine->m_pulse3);
 
         glUniform1fv(m_uniformFft, FFT_ACTUAL_SPECTRUM_SIZE, m_spectrum);
+
+        for (auto& [id, node, posLoc, rotLoc, scaleLoc, sizeLoc, visibleLoc] : m_uniformNodes) {
+            if (node == nullptr)
+                node = this->getParent()->getChildByIDRecursive(id);
+            if (node == nullptr) {
+                log::warn("failed to find node with id '{}'", id);
+                continue;
+            }
+            auto pos = node->convertToWorldSpaceAR(CCPoint{0.f, 0.f});
+            glUniform2f(posLoc, pos.x, pos.y);
+            glUniform2f(sizeLoc, node->getContentSize().width, node->getContentSize().height);
+            if (!rotLoc && !scaleLoc && !visibleLoc)
+                continue;
+            auto [rotation, scaleX, scaleY, visible] = getStuffRecursive(node);
+            glUniform1f(rotLoc, rotation);
+            glUniform2f(scaleLoc, scaleX, scaleY);
+            glUniform1i(visibleLoc, visible);
+        }
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
