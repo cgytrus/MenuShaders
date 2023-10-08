@@ -26,7 +26,7 @@ struct Shader {
         vertexSource = utils::string::trim(vertexSource);
         if (auto match = ctre::match<"^#version [0-9]+( core| compatibility|)$">(vertexSource)) {
             vertexSource.erase(match.get<0>().begin(), match.get<0>().end());
-            log::warn("For shader developers: #version is unsupported! Always forced to 120 on desktop and undefined on mobile.");
+            log::warn("For shader developers: #version is unsupported! Always forced to 120 on Windows and undefined on macOS and mobile.");
         }
         if (auto match = ctre::match<"precision [a-zA-Z]+ [a-zA-Z]+;">(vertexSource)) {
             vertexSource.erase(match.get<0>().begin(), match.get<0>().end());
@@ -36,7 +36,7 @@ struct Shader {
         fragmentSource = utils::string::trim(fragmentSource);
         if (auto match = ctre::match<"^#version [0-9]+( core| compatibility|)$">(fragmentSource)) {
             fragmentSource.erase(match.get<0>().begin(), match.get<0>().end());
-            log::warn("For shader developers: #version is unsupported! Always forced to 120 on desktop and undefined on mobile.");
+            log::warn("For shader developers: #version is unsupported! Always forced to 120 on Windows and undefined on macOS and mobile.");
         }
         if (auto match = ctre::match<"precision [a-zA-Z]+ [a-zA-Z]+;">(fragmentSource)) {
             fragmentSource.erase(match.get<0>().begin(), match.get<0>().end());
@@ -58,7 +58,7 @@ struct Shader {
 
         vertex = glCreateShader(GL_VERTEX_SHADER);
         const char* vertexSources[] = {
-#ifdef GEODE_IS_DESKTOP
+#ifdef GEODE_IS_WINDOWS
             "#version 120\n",
 #endif
 #ifdef GEODE_IS_MOBILE
@@ -66,7 +66,7 @@ struct Shader {
 #endif
             vertexSource.c_str()
         };
-        glShaderSource(vertex, 1, vertexSources, nullptr);
+        glShaderSource(vertex, sizeof(vertexSources) / sizeof(char*), vertexSources, nullptr);
         glCompileShader(vertex);
         auto vertexLog = getShaderLog(vertex);
 
@@ -79,7 +79,7 @@ struct Shader {
 
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
         const char* fragmentSources[] = {
-#ifdef GEODE_IS_DESKTOP
+#ifdef GEODE_IS_WINDOWS
             "#version 120\n",
 #endif
 #ifdef GEODE_IS_MOBILE
@@ -87,7 +87,7 @@ struct Shader {
 #endif
             fragmentSource.c_str()
         };
-        glShaderSource(fragment, 1, fragmentSources, nullptr);
+        glShaderSource(fragment, sizeof(vertexSources) / sizeof(char*), fragmentSources, nullptr);
         glCompileShader(fragment);
         auto fragmentLog = getShaderLog(fragment);
 
