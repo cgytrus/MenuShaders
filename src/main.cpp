@@ -1,5 +1,4 @@
 #include <Geode/Geode.hpp>
-#include <Geode/modify/MenuLayer.hpp>
 
 #include <ghc/filesystem.hpp>
 
@@ -417,21 +416,74 @@ public:
 #endif
     }
 
-    static auto create(const std::string& vert, const std::string& frag) {
+    static ShaderNode* create(const std::string& vert, const std::string& frag) {
         auto node = new ShaderNode;
-        if (node->init(vert, frag))
-            node->autorelease();
-        else
+        if (!node->init(vert, frag)) {
             CC_SAFE_DELETE(node);
+            return nullptr;
+        }
+        node->autorelease();
         return node;
+    }
+
+    static Result<ShaderNode*> createWithMenuName(const std::string& name) {
+        ghc::filesystem::path vertexPath =
+            (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename(Mod::get()->expandSpriteName((name + "-vert.glsl").c_str()), false);
+        if (!ghc::filesystem::exists(vertexPath)) {
+            vertexPath =
+                (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename("any-vert.glsl"_spr, false);
+        }
+
+        ghc::filesystem::path fragmentPath =
+            (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename(Mod::get()->expandSpriteName((name + "-frag.glsl").c_str()), false);
+        if (!ghc::filesystem::exists(fragmentPath)) {
+            fragmentPath =
+                (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename("menu-shader.fsh", false);
+        }
+        if (!ghc::filesystem::exists(fragmentPath)) {
+            fragmentPath =
+                (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename("any-frag.glsl"_spr, false);
+        }
+
+        auto vertexSource = file::readString(vertexPath);
+        if (!vertexSource)
+            return Err("failed to read vertex shader at path {}: {}", vertexPath.string(),
+                vertexSource.unwrapErr());
+
+        auto fragmentSource = file::readString(fragmentPath);
+        if (!fragmentSource)
+            return Err("failed to read fragment shader at path {}: {}", fragmentPath.string(),
+                vertexSource.unwrapErr());
+
+        auto shader = ShaderNode::create(vertexSource.unwrap(), fragmentSource.unwrap());
+        if (!shader)
+            return Err("failed to create shader node");
+        return Ok(shader);
+    }
+
+    static bool tryAddToNode(CCNode* node, const std::string& name, int zOrder) {
+        if (!Mod::get()->getSettingValue<bool>("show-" + name))
+            return false;
+
+        auto res = ShaderNode::createWithMenuName(name);
+        if (!res) {
+            log::error("Failed to load menu shader: {}", res.unwrapErr());
+            return false;
+        }
+        auto shader = res.unwrap();
+        shader->setZOrder(zOrder);
+        node->addChild(shader);
+        return true;
     }
 };
 
+#include <Geode/modify/MenuLayer.hpp>
 class $modify(MenuLayer) {
     bool init() {
         if (!MenuLayer::init())
             return false;
-
+        if (!ShaderNode::tryAddToNode(this, "main", -10))
+            return true;
         for (const auto& child : CCArrayExt<CCNode*>(this->getChildren())) {
             auto layer = typeinfo_cast<MenuGameLayer*>(child);
             if (!layer)
@@ -439,38 +491,106 @@ class $modify(MenuLayer) {
             layer->removeFromParentAndCleanup(true);
             break;
         }
+        return true;
+    }
+};
 
-        ghc::filesystem::path vertexPath =
-            (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename("menu-vert.glsl"_spr, false);
-
-        ghc::filesystem::path fragmentPath =
-            (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename("menu-shader.fsh", false);
-        if (!ghc::filesystem::exists(fragmentPath)) {
-            fragmentPath =
-                (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename("menu-frag.glsl"_spr, false);
-        }
-
-        auto vertexSource = file::readString(vertexPath);
-        if (!vertexSource) {
-            log::error("failed to read vertex shader at path {}: {}", vertexPath.string(),
-                vertexSource.unwrapErr());
+#include <Geode/modify/LevelSelectLayer.hpp>
+class $modify(LevelSelectLayer) {
+    bool init(int lvl) {
+        if (!LevelSelectLayer::init(lvl))
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "level-select", -2))
             return true;
+        for (const auto& child : CCArrayExt<CCNode*>(this->getChildren())) {
+            auto sprite = typeinfo_cast<CCSprite*>(child);
+            if (sprite && sprite->getZOrder() <= 1)
+                sprite->setVisible(false);
+            if (auto ground = typeinfo_cast<GJGroundLayer*>(child))
+                ground->setVisible(false);
         }
+        return true;
+    }
+};
 
-        auto fragmentSource = file::readString(fragmentPath);
-        if (!fragmentSource) {
-            log::error("failed to read fragment shader at path {}: {}", fragmentPath.string(),
-                vertexSource.unwrapErr());
+#include <Geode/modify/CreatorLayer.hpp>
+class $modify(CreatorLayer) {
+    bool init() {
+        if (!CreatorLayer::init())
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "creator", -2))
             return true;
+        this->getChildByID("background")->setVisible(false);
+        for (const auto& child : CCArrayExt<CCNode*>(this->getChildren())) {
+            auto sprite = typeinfo_cast<CCSprite*>(child);
+            if (sprite && (sprite->getZOrder() == -1 || sprite->getZOrder() == 1))
+                sprite->setVisible(false);
         }
+        return true;
+    }
+};
 
-        auto shader = ShaderNode::create(vertexSource.unwrap(), fragmentSource.unwrap());
-        if (shader == nullptr)
+#include <Geode/modify/LevelBrowserLayer.hpp>
+class $modify(LevelBrowserLayer) {
+    bool init(GJSearchObject* search) {
+        if (!LevelBrowserLayer::init(search))
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "level-browser", -2))
             return true;
+        for (const auto& child : CCArrayExt<CCNode*>(this->getChildren())) {
+            auto sprite = typeinfo_cast<CCSprite*>(child);
+            if (sprite && (sprite->getZOrder() < 0 || sprite->getZOrder() == 1))
+                sprite->setVisible(false);
+        }
+        return true;
+    }
+};
 
-        shader->setZOrder(-10);
-        this->addChild(shader);
+#include <Geode/modify/EditLevelLayer.hpp>
+class $modify(EditLevelLayer) {
+    bool init(GJGameLevel* level) {
+        if (!EditLevelLayer::init(level))
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "edit-level", -2))
+            return true;
+        this->getChildByID("background")->setVisible(false);
+        this->getChildByID("bottom-left-art")->setVisible(false);
+        this->getChildByID("bottom-right-art")->setVisible(false);
+        this->getChildByID("level-name-background")->setVisible(false);
+        this->getChildByID("description-background")->setVisible(false);
+        return true;
+    }
+};
 
+#include <Geode/modify/LevelInfoLayer.hpp>
+class $modify(LevelInfoLayer) {
+    bool init(GJGameLevel* level) {
+        if (!LevelInfoLayer::init(level))
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "play-level", -2))
+            return true;
+        this->getChildByID("background")->setVisible(false);
+        this->getChildByID("bottom-left-art")->setVisible(false);
+        this->getChildByID("bottom-right-art")->setVisible(false);
+        return true;
+    }
+};
+
+#include <Geode/modify/LevelSearchLayer.hpp>
+class $modify(LevelSearchLayer) {
+    bool init() {
+        if (!LevelSearchLayer::init())
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "search", -3))
+            return true;
+        this->getChildByID("background")->setVisible(false);
+        this->getChildByID("left-corner")->setVisible(false);
+        this->getChildByID("right-corner")->setVisible(false);
+        this->getChildByID("level-search-bg")->setVisible(false);
+        this->getChildByID("level-search-bar-bg")->setVisible(false);
+        this->getChildByID("quick-search-bg")->setVisible(false);
+        this->getChildByID("difficulty-filters-bg")->setVisible(false);
+        this->getChildByID("length-filters-bg")->setVisible(false);
         return true;
     }
 };

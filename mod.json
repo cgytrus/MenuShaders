@@ -15,5 +15,49 @@
         "files": [
             "resources/shaders/*.glsl"
         ]
+    },
+    "settings": {
+        "show-main": {
+            "name": "Show in main menu",
+            "description": "MenuLayer",
+            "type": "bool",
+            "default": true
+        },
+        "show-level-select": {
+            "name": "Show in level select menu",
+            "description": "LevelSelectLayer",
+            "type": "bool",
+            "default": false
+        },
+        "show-creator": {
+            "name": "Show in creator menu",
+            "description": "CreatorLayer",
+            "type": "bool",
+            "default": false
+        },
+        "show-level-browser": {
+            "name": "Show in level lists",
+            "description": "Hall of Fame, Featured, Saved, etc. (LevelBrowserLayer)",
+            "type": "bool",
+            "default": false
+        },
+        "show-edit-level": {
+            "name": "Show in edit level menu",
+            "description": "EditLevelLayer",
+            "type": "bool",
+            "default": false
+        },
+        "show-play-level": {
+            "name": "Show in play level menu",
+            "description": "LevelInfoLayer",
+            "type": "bool",
+            "default": false
+        },
+        "show-search": {
+            "name": "Show in search menu",
+            "description": "LevelSearchLayer",
+            "type": "bool",
+            "default": false
+        }
     }
 }
