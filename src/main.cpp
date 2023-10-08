@@ -193,6 +193,8 @@ public:
     }
 
     bool init(const std::string& vert, const std::string& frag) {
+        this->setID("shader-background");
+
         auto res = m_shader.compile(vert, frag);
         if (!res) {
             log::error("{}", res.unwrapErr());
