@@ -24,21 +24,21 @@ struct Shader {
         std::string fragmentSource
     ) {
         vertexSource = utils::string::trim(vertexSource);
-        if (auto match = ctre::match<"^#version [0-9]+( core| compatibility|)$">(vertexSource)) {
+        if (auto match = ctre::multiline_search<"^#version [0-9]+( core| compatibility|)$">(vertexSource)) {
             vertexSource.erase(match.get<0>().begin(), match.get<0>().end());
             log::warn("For shader developers: #version is unsupported! Always forced to 120 on Windows and undefined on macOS and mobile.");
         }
-        if (auto match = ctre::match<"precision [a-zA-Z]+ [a-zA-Z]+;">(vertexSource)) {
+        if (auto match = ctre::multiline_search<"precision [a-zA-Z]+ [a-zA-Z]+;">(vertexSource)) {
             vertexSource.erase(match.get<0>().begin(), match.get<0>().end());
             log::warn("For shader developers: precision is unsupported! Always forced to undefined on desktop and highp on mobile.");
         }
 
         fragmentSource = utils::string::trim(fragmentSource);
-        if (auto match = ctre::match<"^#version [0-9]+( core| compatibility|)$">(fragmentSource)) {
+        if (auto match = ctre::multiline_search<"^#version [0-9]+( core| compatibility|)$">(fragmentSource)) {
             fragmentSource.erase(match.get<0>().begin(), match.get<0>().end());
             log::warn("For shader developers: #version is unsupported! Always forced to 120 on Windows and undefined on macOS and mobile.");
         }
-        if (auto match = ctre::match<"precision [a-zA-Z]+ [a-zA-Z]+;">(fragmentSource)) {
+        if (auto match = ctre::multiline_search<"precision [a-zA-Z]+ [a-zA-Z]+;">(fragmentSource)) {
             fragmentSource.erase(match.get<0>().begin(), match.get<0>().end());
             log::warn("For shader developers: precision is unsupported! Always forced to undefined on desktop and highp on mobile.");
         }
