@@ -153,6 +153,7 @@ struct Shader {
     }
 };
 
+float shaderTime = 0.f;
 class ShaderNode : public CCNode {
     Shader m_shader;
     GLuint m_vao = 0;
@@ -165,7 +166,6 @@ class ShaderNode : public CCNode {
     GLint m_uniformPulse3 = 0;
     GLint m_uniformFft = 0;
     std::vector<std::tuple<std::string, CCNode*, GLint, GLint, GLint, GLint, GLint>> m_uniformNodes;
-    float m_time = 0.f;
     FMOD::DSP* m_fftDsp = nullptr;
     static constexpr int FFT_SPECTRUM_SIZE = 1024;
     // gd cuts frequencies higher than ~16kHz, so we should too (the "140/512" part)
@@ -314,7 +314,7 @@ public:
     }
 
     void update(float dt) override {
-        m_time += dt;
+        shaderTime += dt;
         m_spectrumUpdateAccumulator += dt;
 
         const float speed = 1.f / FFT_UPDATE_FREQUENCY;
@@ -379,7 +379,7 @@ public:
             ccGLBindTexture2DN(i, sprite->getTexture()->getName());
         }
 
-        glUniform1f(m_uniformTime, m_time);
+        glUniform1f(m_uniformTime, shaderTime);
 
         // thx adaf for telling me where these are
         auto engine = FMODAudioEngine::sharedEngine();
@@ -462,12 +462,15 @@ public:
     }
 
     static bool tryAddToNode(CCNode* node, const std::string& name, int zOrder) {
-        if (!Mod::get()->getSettingValue<bool>("show-" + name))
+        if (!Mod::get()->getSettingValue<bool>("show-" + name)) {
+            shaderTime = 0.f;
             return false;
+        }
 
         auto res = ShaderNode::createWithMenuName(name);
         if (!res) {
             log::error("Failed to load menu shader: {}", res.unwrapErr());
+            shaderTime = 0.f;
             return false;
         }
         auto shader = res.unwrap();
