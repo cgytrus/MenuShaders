@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
 
-project(MenuShaders VERSION 1.0.0)
+project(MenuShaders VERSION 1.1.0)
 
 file(GLOB SOURCES
     src/*.cpp
