@@ -3,6 +3,8 @@
 
 #include <ghc/filesystem.hpp>
 
+#include <ctre.hpp>
+
 using namespace geode::prelude;
 
 // ported from https://github.com/matcool/small-gd-mods/blob/3e1783c7e281cbbccd53f9c4ceb697d5a6f839dd/src/menu-shaders.cpp
@@ -18,9 +20,29 @@ struct Shader {
     GLuint program = 0;
 
     Result<std::string> compile(
-        const std::string& vertexSource,
-        const std::string& fragmentSource
+        std::string vertexSource,
+        std::string fragmentSource
     ) {
+        vertexSource = utils::string::trim(vertexSource);
+        if (auto match = ctre::match<"^#version [0-9]+( core| compatibility|)$">(vertexSource)) {
+            vertexSource.erase(match.get<0>().begin(), match.get<0>().end());
+            log::warn("For shader developers: #version is unsupported! Always forced to 120 on desktop and undefined on mobile.");
+        }
+        if (auto match = ctre::match<"precision [a-zA-Z]+ [a-zA-Z]+;">(vertexSource)) {
+            vertexSource.erase(match.get<0>().begin(), match.get<0>().end());
+            log::warn("For shader developers: precision is unsupported! Always forced to undefined on desktop and highp on mobile.");
+        }
+
+        fragmentSource = utils::string::trim(fragmentSource);
+        if (auto match = ctre::match<"^#version [0-9]+( core| compatibility|)$">(fragmentSource)) {
+            fragmentSource.erase(match.get<0>().begin(), match.get<0>().end());
+            log::warn("For shader developers: #version is unsupported! Always forced to 120 on desktop and undefined on mobile.");
+        }
+        if (auto match = ctre::match<"precision [a-zA-Z]+ [a-zA-Z]+;">(fragmentSource)) {
+            fragmentSource.erase(match.get<0>().begin(), match.get<0>().end());
+            log::warn("For shader developers: precision is unsupported! Always forced to undefined on desktop and highp on mobile.");
+        }
+
         auto getShaderLog = [](GLuint id) -> std::string {
             GLint length, written;
             glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
@@ -35,8 +57,16 @@ struct Shader {
         GLint res;
 
         vertex = glCreateShader(GL_VERTEX_SHADER);
-        auto oglSucks = vertexSource.c_str();
-        glShaderSource(vertex, 1, &oglSucks, nullptr);
+        const char* vertexSources[] = {
+#ifdef GEODE_IS_DESKTOP
+            "#version 120\n",
+#endif
+#ifdef GEODE_IS_MOBILE
+            "precision highp float;\n",
+#endif
+            vertexSource.c_str()
+        };
+        glShaderSource(vertex, 1, vertexSources, nullptr);
         glCompileShader(vertex);
         auto vertexLog = getShaderLog(vertex);
 
@@ -48,8 +78,16 @@ struct Shader {
         }
 
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
-        oglSucks = fragmentSource.c_str();
-        glShaderSource(fragment, 1, &oglSucks, nullptr);
+        const char* fragmentSources[] = {
+#ifdef GEODE_IS_DESKTOP
+            "#version 120\n",
+#endif
+#ifdef GEODE_IS_MOBILE
+            "precision highp float;\n",
+#endif
+            fragmentSource.c_str()
+        };
+        glShaderSource(fragment, 1, fragmentSources, nullptr);
         glCompileShader(fragment);
         auto fragmentLog = getShaderLog(fragment);
 
@@ -218,12 +256,15 @@ public:
 
         GameSoundManager::get()->enableMetering();
 
+        // TODO: add back when geode android will link to fmod
+#ifndef GEODE_IS_ANDROID
         auto engine = FMODAudioEngine::sharedEngine();
         engine->m_system->createDSPByType(FMOD_DSP_TYPE_FFT, &m_fftDsp);
         engine->m_globalChannel->addDSP(1, m_fftDsp);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HAMMING);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWSIZE, FFT_WINDOW_SIZE);
         m_fftDsp->setActive(true);
+#endif
 
         GLfloat vertices[] = {
             // positions
@@ -263,9 +304,12 @@ public:
     }
 
     ~ShaderNode() override {
+        // TODO: add back when geode android will link to fmod
+#ifndef GEODE_IS_ANDROID
         if (m_fftDsp) {
             FMODAudioEngine::sharedEngine()->m_globalChannel->removeDSP(m_fftDsp);
         }
+#endif
     }
 
     void update(float dt) override {
@@ -277,7 +321,10 @@ public:
             if (m_fftDsp) {
                 FMOD_DSP_PARAMETER_FFT* data;
                 unsigned int length;
+                // TODO: add back when geode android will link to fmod
+#ifndef GEODE_IS_ANDROID
                 m_fftDsp->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, (void**)&data, &length, nullptr, 0);
+#endif
                 if (length) {
                     for (size_t i = 0; i < std::min(data->length, FFT_ACTUAL_SPECTRUM_SIZE); i++) {
                         m_oldSpectrum[i] = m_newSpectrum[i];

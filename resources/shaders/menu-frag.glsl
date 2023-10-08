@@ -1,5 +1,3 @@
-#version 120
-
 /*
 Here's an extremely simple shader that just shows the uv,
 while also showing all available uniforms

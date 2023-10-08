@@ -28,3 +28,6 @@ elseif(APPLE)
 elseif(ANDROID)
     target_link_libraries(${PROJECT_NAME} GLESv2)
 endif()
+
+CPMAddPackage("gh:hanickadot/compile-time-regular-expressions#3259bf6")
+target_link_libraries(${PROJECT_NAME} ctre)
