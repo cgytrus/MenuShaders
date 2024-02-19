@@ -199,7 +199,7 @@ public:
             log::error("{}", res.unwrapErr());
             return false;
         }
-        log::info(res.unwrap());
+        log::info("{}", res.unwrap());
 
         glBindAttribLocation(m_shader.program, 0, "aPosition");
 
@@ -208,7 +208,7 @@ public:
             log::error("{}", res.unwrapErr());
             return false;
         }
-        log::info(res.unwrap());
+        log::info("{}", res.unwrap());
 
         ccGLUseProgram(m_shader.program);
 
@@ -255,7 +255,10 @@ public:
             }
         }
 
-        GameSoundManager::get()->enableMetering();
+        // todo: this seems to be inline on windows, idk how to deal with that
+        #ifdef GEODE_IS_ANDROID
+        FMODAudioEngine::sharedEngine()->enableMetering();
+        #endif
 
         // TODO: add back when geode android will link to fmod
 #ifndef GEODE_IS_ANDROID
@@ -383,9 +386,9 @@ public:
 
         // thx adaf for telling me where these are
         auto engine = FMODAudioEngine::sharedEngine();
-        glUniform1f(m_uniformPulse1, engine->m_pulse1);
-        glUniform1f(m_uniformPulse2, engine->m_pulse2);
-        glUniform1f(m_uniformPulse3, engine->m_pulse3);
+        glUniform1f(m_uniformPulse1, /*engine->m_pulse1*/0.0f); // todo
+        glUniform1f(m_uniformPulse2, /*engine->m_pulse2*/0.0f); // todo
+        glUniform1f(m_uniformPulse3, /*engine->m_pulse3*/0.0f); // todo
 
         glUniform1fv(m_uniformFft, FFT_ACTUAL_SPECTRUM_SIZE, m_spectrum);
 
@@ -567,8 +570,8 @@ class $modify(EditLevelLayer) {
 
 #include <Geode/modify/LevelInfoLayer.hpp>
 class $modify(LevelInfoLayer) {
-    bool init(GJGameLevel* level) {
-        if (!LevelInfoLayer::init(level))
+    bool init(GJGameLevel* level, bool a) {
+        if (!LevelInfoLayer::init(level, a))
             return false;
         if (!ShaderNode::tryAddToNode(this, "play-level", -2))
             return true;
@@ -581,8 +584,8 @@ class $modify(LevelInfoLayer) {
 
 #include <Geode/modify/LevelSearchLayer.hpp>
 class $modify(LevelSearchLayer) {
-    bool init() {
-        if (!LevelSearchLayer::init())
+    bool init(int a) {
+        if (!LevelSearchLayer::init(a))
             return false;
         if (!ShaderNode::tryAddToNode(this, "search", -3))
             return true;
