@@ -1,7 +1,10 @@
 {
     "geode": "2.0.0",
     "version": "v1.1.1",
-    "gd": "2.204",
+    "gd": {
+        "win": "2.204",
+        "android": "2.205"
+    },
     "id": "cgytrus.menu-shaders",
     "name": "Menu Shaders",
     "developer": "mat & ConfiG",
