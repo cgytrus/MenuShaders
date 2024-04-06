@@ -258,12 +258,14 @@ public:
         // this seems to not be needed
         //FMODAudioEngine::sharedEngine()->enableMetering();
 
+        #ifndef GEODE_IS_MACOS // m_backgroundMusicChannel isn't in mac bindings
         auto engine = FMODAudioEngine::sharedEngine();
         engine->m_system->createDSPByType(FMOD_DSP_TYPE_FFT, &m_fftDsp);
         engine->m_backgroundMusicChannel->addDSP(1, m_fftDsp);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HAMMING);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWSIZE, FFT_WINDOW_SIZE);
         m_fftDsp->setActive(true);
+        #endif
 
         GLfloat vertices[] = {
             // positions
@@ -304,7 +306,9 @@ public:
 
     ~ShaderNode() override {
         if (m_fftDsp) {
+            #ifndef GEODE_IS_MACOS
             FMODAudioEngine::sharedEngine()->m_backgroundMusicChannel->removeDSP(m_fftDsp);
+            #endif
         }
     }
 
