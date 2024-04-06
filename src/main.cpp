@@ -372,7 +372,9 @@ public:
 
         for (size_t i = 0; i < m_shaderSprites.size(); ++i) {
             auto sprite = m_shaderSprites[i];
-            ccGLBindTexture2DN(i, sprite->getTexture()->getName());
+            #ifndef GEODE_IS_MACOS
+            ccGLBindTexture2DN(i, sprite->getTexture()->getName()); // doesn't have mac bindings
+            #endif
         }
 
         glUniform1f(m_uniformTime, shaderTime);
@@ -392,7 +394,11 @@ public:
                 log::warn("failed to find node with id '{}'", id);
                 continue;
             }
+            #ifndef GEODE_IS_MACOS
             auto pos = node->convertToWorldSpaceAR(CCPoint{0.f, 0.f});
+            #else
+            auto pos = node->convertToWorldSpace(CCPoint{0.f, 0.f} + node->getAnchorPointInPoints());
+            #endif
             glUniform2f(posLoc, pos.x, pos.y);
             glUniform2f(sizeLoc, node->getContentSize().width, node->getContentSize().height);
             if (!rotLoc && !scaleLoc && !visibleLoc)
