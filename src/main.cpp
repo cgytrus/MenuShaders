@@ -255,20 +255,15 @@ public:
             }
         }
 
-        // todo: this seems to be inline on windows, idk how to deal with that
-        #ifdef GEODE_IS_ANDROID
-        FMODAudioEngine::sharedEngine()->enableMetering();
-        #endif
+        // this seems to not be needed
+        //FMODAudioEngine::sharedEngine()->enableMetering();
 
-        // TODO: add back when geode android will link to fmod
-#ifndef GEODE_IS_ANDROID
         auto engine = FMODAudioEngine::sharedEngine();
         engine->m_system->createDSPByType(FMOD_DSP_TYPE_FFT, &m_fftDsp);
-        engine->m_globalChannel->addDSP(1, m_fftDsp);
+        engine->m_backgroundMusicChannel->addDSP(1, m_fftDsp);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HAMMING);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWSIZE, FFT_WINDOW_SIZE);
         m_fftDsp->setActive(true);
-#endif
 
         GLfloat vertices[] = {
             // positions
@@ -308,12 +303,9 @@ public:
     }
 
     ~ShaderNode() override {
-        // TODO: add back when geode android will link to fmod
-#ifndef GEODE_IS_ANDROID
         if (m_fftDsp) {
-            FMODAudioEngine::sharedEngine()->m_globalChannel->removeDSP(m_fftDsp);
+            FMODAudioEngine::sharedEngine()->m_backgroundMusicChannel->removeDSP(m_fftDsp);
         }
-#endif
     }
 
     void update(float dt) override {
@@ -325,10 +317,7 @@ public:
             if (m_fftDsp) {
                 FMOD_DSP_PARAMETER_FFT* data;
                 unsigned int length;
-                // TODO: add back when geode android will link to fmod
-#ifndef GEODE_IS_ANDROID
                 m_fftDsp->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, (void**)&data, &length, nullptr, 0);
-#endif
                 if (length) {
                     for (size_t i = 0; i < std::min(data->length, FFT_ACTUAL_SPECTRUM_SIZE); i++) {
                         m_oldSpectrum[i] = m_newSpectrum[i];
