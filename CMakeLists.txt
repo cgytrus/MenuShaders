@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
 
-project(MenuShaders VERSION 1.1.1)
+project(MenuShaders VERSION 1.2.0)
 
 file(GLOB SOURCES
     src/*.cpp
@@ -29,5 +29,5 @@ elseif(ANDROID)
     target_link_libraries(${PROJECT_NAME} GLESv2)
 endif()
 
-CPMAddPackage("gh:hanickadot/compile-time-regular-expressions#3259bf6")
+CPMAddPackage("gh:hanickadot/compile-time-regular-expressions#9725886")
 target_link_libraries(${PROJECT_NAME} ctre)
