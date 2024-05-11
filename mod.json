@@ -21,6 +21,13 @@
             "resources/shaders/*.glsl"
         ]
     },
+    "dependencies": [
+        {
+            "id": "geode.node-ids",
+            "version": ">=v1.9.1",
+            "importance": "required"
+        }
+    ],
     "settings": {
         "show-main": {
             "name": "Show in main menu",
