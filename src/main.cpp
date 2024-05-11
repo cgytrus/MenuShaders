@@ -255,17 +255,14 @@ public:
             }
         }
 
-        // this seems to not be needed
-        //FMODAudioEngine::sharedEngine()->enableMetering();
+        FMODAudioEngine::sharedEngine()->enableMetering();
 
-        #ifndef GEODE_IS_MACOS // m_backgroundMusicChannel isn't in mac bindings
         auto engine = FMODAudioEngine::sharedEngine();
         engine->m_system->createDSPByType(FMOD_DSP_TYPE_FFT, &m_fftDsp);
         engine->m_backgroundMusicChannel->addDSP(1, m_fftDsp);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HAMMING);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWSIZE, FFT_WINDOW_SIZE);
         m_fftDsp->setActive(true);
-        #endif
 
         GLfloat vertices[] = {
             // positions
@@ -306,9 +303,7 @@ public:
 
     ~ShaderNode() override {
         if (m_fftDsp) {
-            #ifndef GEODE_IS_MACOS
             FMODAudioEngine::sharedEngine()->m_backgroundMusicChannel->removeDSP(m_fftDsp);
-            #endif
         }
     }
 
@@ -372,18 +367,16 @@ public:
 
         for (size_t i = 0; i < m_shaderSprites.size(); ++i) {
             auto sprite = m_shaderSprites[i];
-            #ifndef GEODE_IS_MACOS
-            ccGLBindTexture2DN(i, sprite->getTexture()->getName()); // doesn't have mac bindings
-            #endif
+            ccGLBindTexture2DN(i, sprite->getTexture()->getName());
         }
 
         glUniform1f(m_uniformTime, shaderTime);
 
         // thx adaf for telling me where these are
         auto engine = FMODAudioEngine::sharedEngine();
-        glUniform1f(m_uniformPulse1, /*engine->m_pulse1*/0.0f); // todo
-        glUniform1f(m_uniformPulse2, /*engine->m_pulse2*/0.0f); // todo
-        glUniform1f(m_uniformPulse3, /*engine->m_pulse3*/0.0f); // todo
+        glUniform1f(m_uniformPulse1, engine->m_pulse1);
+        glUniform1f(m_uniformPulse2, engine->m_pulse2);
+        glUniform1f(m_uniformPulse3, engine->m_pulse3);
 
         glUniform1fv(m_uniformFft, FFT_ACTUAL_SPECTRUM_SIZE, m_spectrum);
 
@@ -394,11 +387,7 @@ public:
                 log::warn("failed to find node with id '{}'", id);
                 continue;
             }
-            #ifndef GEODE_IS_MACOS
-            auto pos = node->convertToWorldSpaceAR(CCPoint{0.f, 0.f});
-            #else
             auto pos = node->convertToWorldSpace(CCPoint{0.f, 0.f} + node->getAnchorPointInPoints());
-            #endif
             glUniform2f(posLoc, pos.x, pos.y);
             glUniform2f(sizeLoc, node->getContentSize().width, node->getContentSize().height);
             if (!rotLoc && !scaleLoc && !visibleLoc)
