@@ -1,6 +1,4 @@
-﻿#include <Geode/Geode.hpp>
-
-#define CommentType CommentTypeDummy
+﻿#define CommentType CommentTypeDummy
 #import "Cocoa/Cocoa.h"
 #undef CommentType
 
