@@ -1,4 +1,4 @@
-﻿## v1.2.0
+## v1.2.0
 - updated to 2.2 (rooot did a huge part in this thanks !!!)
 - added android support
 - probably some other fixes i forgot about
