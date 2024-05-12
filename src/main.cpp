@@ -153,6 +153,14 @@ struct Shader {
     }
 };
 
+#ifdef GEODE_IS_MACOS
+float retinaFactor();
+#else
+float retinaFactor() {
+    return 1.f;
+}
+#endif
+
 float shaderTime = 0.f;
 class ShaderNode : public CCNode {
     Shader m_shader;
@@ -359,7 +367,7 @@ public:
 
         auto glv = CCDirector::sharedDirector()->getOpenGLView();
         auto winSize = CCDirector::sharedDirector()->getWinSize();
-        auto frSize = glv->getFrameSize();
+        auto frSize = glv->getFrameSize() * retinaFactor();
 
         glUniform2f(m_uniformResolution, frSize.width, frSize.height);
         auto mousePos = cocos::getMousePos() / winSize * frSize;

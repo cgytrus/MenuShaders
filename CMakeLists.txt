@@ -5,9 +5,16 @@ set(CMAKE_OSX_ARCHITECTURES "x86_64")
 
 project(MenuShaders VERSION 1.2.0)
 
-file(GLOB SOURCES
-    src/*.cpp
-)
+if (APPLE)
+    file(SOURCES
+        src/main.cpp
+        src/retina.mm
+    )
+else ()
+    file(SOURCES
+        src/main.cpp
+    )
+endif ()
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES})
 
