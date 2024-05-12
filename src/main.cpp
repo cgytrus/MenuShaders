@@ -153,6 +153,14 @@ struct Shader {
     }
 };
 
+#ifdef GEODE_IS_MACOS
+float retinaFactor();
+#else
+float retinaFactor() {
+    return 1.f;
+}
+#endif
+
 float shaderTime = 0.f;
 class ShaderNode : public CCNode {
     Shader m_shader;
@@ -199,7 +207,7 @@ public:
             log::error("{}", res.unwrapErr());
             return false;
         }
-        log::info(res.unwrap());
+        log::info("{}", res.unwrap());
 
         glBindAttribLocation(m_shader.program, 0, "aPosition");
 
@@ -208,7 +216,7 @@ public:
             log::error("{}", res.unwrapErr());
             return false;
         }
-        log::info(res.unwrap());
+        log::info("{}", res.unwrap());
 
         ccGLUseProgram(m_shader.program);
 
@@ -255,17 +263,14 @@ public:
             }
         }
 
-        GameSoundManager::get()->enableMetering();
+        FMODAudioEngine::sharedEngine()->enableMetering();
 
-        // TODO: add back when geode android will link to fmod
-#ifndef GEODE_IS_ANDROID
         auto engine = FMODAudioEngine::sharedEngine();
         engine->m_system->createDSPByType(FMOD_DSP_TYPE_FFT, &m_fftDsp);
-        engine->m_globalChannel->addDSP(1, m_fftDsp);
+        engine->m_backgroundMusicChannel->addDSP(1, m_fftDsp);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWTYPE, FMOD_DSP_FFT_WINDOW_HAMMING);
         m_fftDsp->setParameterInt(FMOD_DSP_FFT_WINDOWSIZE, FFT_WINDOW_SIZE);
         m_fftDsp->setActive(true);
-#endif
 
         GLfloat vertices[] = {
             // positions
@@ -305,12 +310,9 @@ public:
     }
 
     ~ShaderNode() override {
-        // TODO: add back when geode android will link to fmod
-#ifndef GEODE_IS_ANDROID
         if (m_fftDsp) {
-            FMODAudioEngine::sharedEngine()->m_globalChannel->removeDSP(m_fftDsp);
+            FMODAudioEngine::sharedEngine()->m_backgroundMusicChannel->removeDSP(m_fftDsp);
         }
-#endif
     }
 
     void update(float dt) override {
@@ -322,10 +324,7 @@ public:
             if (m_fftDsp) {
                 FMOD_DSP_PARAMETER_FFT* data;
                 unsigned int length;
-                // TODO: add back when geode android will link to fmod
-#ifndef GEODE_IS_ANDROID
                 m_fftDsp->getParameterData(FMOD_DSP_FFT_SPECTRUMDATA, (void**)&data, &length, nullptr, 0);
-#endif
                 if (length) {
                     for (size_t i = 0; i < std::min(data->length, FFT_ACTUAL_SPECTRUM_SIZE); i++) {
                         m_oldSpectrum[i] = m_newSpectrum[i];
@@ -368,7 +367,7 @@ public:
 
         auto glv = CCDirector::sharedDirector()->getOpenGLView();
         auto winSize = CCDirector::sharedDirector()->getWinSize();
-        auto frSize = glv->getFrameSize();
+        auto frSize = glv->getFrameSize() * retinaFactor();
 
         glUniform2f(m_uniformResolution, frSize.width, frSize.height);
         auto mousePos = cocos::getMousePos() / winSize * frSize;
@@ -396,7 +395,7 @@ public:
                 log::warn("failed to find node with id '{}'", id);
                 continue;
             }
-            auto pos = node->convertToWorldSpaceAR(CCPoint{0.f, 0.f});
+            auto pos = node->convertToWorldSpace(CCPoint{0.f, 0.f} + node->getAnchorPointInPoints());
             glUniform2f(posLoc, pos.x, pos.y);
             glUniform2f(sizeLoc, node->getContentSize().width, node->getContentSize().height);
             if (!rotLoc && !scaleLoc && !visibleLoc)
@@ -567,8 +566,8 @@ class $modify(EditLevelLayer) {
 
 #include <Geode/modify/LevelInfoLayer.hpp>
 class $modify(LevelInfoLayer) {
-    bool init(GJGameLevel* level) {
-        if (!LevelInfoLayer::init(level))
+    bool init(GJGameLevel* level, bool a) {
+        if (!LevelInfoLayer::init(level, a))
             return false;
         if (!ShaderNode::tryAddToNode(this, "play-level", -2))
             return true;
@@ -581,8 +580,8 @@ class $modify(LevelInfoLayer) {
 
 #include <Geode/modify/LevelSearchLayer.hpp>
 class $modify(LevelSearchLayer) {
-    bool init() {
-        if (!LevelSearchLayer::init())
+    bool init(int a) {
+        if (!LevelSearchLayer::init(a))
             return false;
         if (!ShaderNode::tryAddToNode(this, "search", -3))
             return true;
