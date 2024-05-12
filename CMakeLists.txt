@@ -6,13 +6,13 @@ set(CMAKE_OSX_ARCHITECTURES "x86_64")
 project(MenuShaders VERSION 1.2.0)
 
 if (APPLE)
-    file(SOURCES
-        src/main.cpp
-        src/retina.mm
+    file(GLOB SOURCES
+        src/*.cpp
+        src/*.mm
     )
 else ()
-    file(SOURCES
-        src/main.cpp
+    file(GLOB SOURCES
+        src/*.cpp
     )
 endif ()
 
