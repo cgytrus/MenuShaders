@@ -1,6 +1,6 @@
 #include <Geode/Geode.hpp>
 
-#include <ghc/filesystem.hpp>
+#include <filesystem>
 
 #include <ctre.hpp>
 
@@ -152,14 +152,6 @@ struct Shader {
         program = 0;
     }
 };
-
-#ifdef GEODE_IS_MACOS
-float retinaFactor();
-#else
-float retinaFactor() {
-    return 1.f;
-}
-#endif
 
 float shaderTime = 0.f;
 class ShaderNode : public CCNode {
@@ -367,7 +359,7 @@ public:
 
         auto glv = CCDirector::sharedDirector()->getOpenGLView();
         auto winSize = CCDirector::sharedDirector()->getWinSize();
-        auto frSize = glv->getFrameSize() * retinaFactor();
+        auto frSize = glv->getFrameSize() * geode::utils::getDisplayFactor();
 
         glUniform2f(m_uniformResolution, frSize.width, frSize.height);
         auto mousePos = cocos::getMousePos() / winSize * frSize;
@@ -426,22 +418,22 @@ public:
     }
 
     static Result<ShaderNode*> createWithMenuName(const std::string& name) {
-        ghc::filesystem::path vertexPath =
-            (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename(Mod::get()->expandSpriteName((name + "-vert.glsl").c_str()), false);
-        if (!ghc::filesystem::exists(vertexPath)) {
+        std::filesystem::path vertexPath =
+            (std::string)CCFileUtils::get()->fullPathForFilename(Mod::get()->expandSpriteName(name + "-vert.glsl").data(), false);
+        if (!std::filesystem::exists(vertexPath)) {
             vertexPath =
-                (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename("any-vert.glsl"_spr, false);
+                (std::string)CCFileUtils::get()->fullPathForFilename("any-vert.glsl"_spr, false);
         }
 
-        ghc::filesystem::path fragmentPath =
-            (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename(Mod::get()->expandSpriteName((name + "-frag.glsl").c_str()), false);
-        if (!ghc::filesystem::exists(fragmentPath)) {
+        std::filesystem::path fragmentPath =
+            (std::string)CCFileUtils::get()->fullPathForFilename(Mod::get()->expandSpriteName(name + "-frag.glsl").data(), false);
+        if (!std::filesystem::exists(fragmentPath)) {
             fragmentPath =
-                (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename("menu-shader.fsh", false);
+                (std::string)CCFileUtils::get()->fullPathForFilename("menu-shader.fsh", false);
         }
-        if (!ghc::filesystem::exists(fragmentPath)) {
+        if (!std::filesystem::exists(fragmentPath)) {
             fragmentPath =
-                (std::string)CCFileUtils::sharedFileUtils()->fullPathForFilename("any-frag.glsl"_spr, false);
+                (std::string)CCFileUtils::get()->fullPathForFilename("any-frag.glsl"_spr, false);
         }
 
         auto vertexSource = file::readString(vertexPath);
