@@ -18,7 +18,7 @@ struct Shader {
     GLuint fragment = 0;
     GLuint program = 0;
 
-    Result<std::string> compile(
+    Result<> compile(
         std::string vertexSource,
         std::string fragmentSource
     ) {
@@ -67,13 +67,20 @@ struct Shader {
         };
         glShaderSource(vertex, sizeof(vertexSources) / sizeof(char*), vertexSources, nullptr);
         glCompileShader(vertex);
-        auto vertexLog = getShaderLog(vertex);
+        auto vertexLog = string::trim(getShaderLog(vertex));
 
         glGetShaderiv(vertex, GL_COMPILE_STATUS, &res);
         if(!res) {
             glDeleteShader(vertex);
             vertex = 0;
             return Err("vertex shader compilation failed:\n{}", vertexLog);
+        }
+
+        if (vertexLog.empty()) {
+            log::debug("vertex shader compilation successful");
+        }
+        else {
+            log::debug("vertex shader compilation successful:\n{}", vertexLog);
         }
 
         fragment = glCreateShader(GL_FRAGMENT_SHADER);
@@ -88,7 +95,7 @@ struct Shader {
         };
         glShaderSource(fragment, sizeof(vertexSources) / sizeof(char*), fragmentSources, nullptr);
         glCompileShader(fragment);
-        auto fragmentLog = getShaderLog(fragment);
+        auto fragmentLog = string::trim(getShaderLog(fragment));
 
         glGetShaderiv(fragment, GL_COMPILE_STATUS, &res);
         if(!res) {
@@ -99,17 +106,21 @@ struct Shader {
             return Err("fragment shader compilation failed:\n{}", fragmentLog);
         }
 
+        if (fragmentLog.empty()) {
+            log::debug("fragment shader compilation successful");
+        }
+        else {
+            log::debug("fragment shader compilation successful:\n{}", fragmentLog);
+        }
+
         program = glCreateProgram();
         glAttachShader(program, vertex);
         glAttachShader(program, fragment);
 
-        return Ok(fmt::format(
-            "shader compilation successful. logs:\nvert:\n{}\nfrag:\n{}",
-            vertexLog, fragmentLog
-        ));
+        return Ok();
     }
 
-    Result<std::string> link() {
+    Result<> link() {
         if (!vertex)
             return Err("vertex shader not compiled");
         if (!fragment)
@@ -129,7 +140,7 @@ struct Shader {
         GLint res;
 
         glLinkProgram(program);
-        auto programLog = getProgramLog(program);
+        auto programLog = string::trim(getProgramLog(program));
 
         glDeleteShader(vertex);
         glDeleteShader(fragment);
@@ -143,7 +154,14 @@ struct Shader {
             return Err("shader link failed:\n{}", programLog);
         }
 
-        return Ok(fmt::format("shader link successful. log:\n{}", programLog));
+        if (programLog.empty()) {
+            log::debug("shader link successful");
+        }
+        else {
+            log::debug("shader link successful:\n{}", programLog);
+        }
+
+        return Ok();
     }
 
     void cleanup() {
@@ -199,7 +217,6 @@ public:
             log::error("{}", res.unwrapErr());
             return false;
         }
-        log::info("{}", res.unwrap());
 
         glBindAttribLocation(m_shader.program, 0, "aPosition");
 
@@ -208,7 +225,6 @@ public:
             log::error("{}", res.unwrapErr());
             return false;
         }
-        log::info("{}", res.unwrap());
 
         ccGLUseProgram(m_shader.program);
 
