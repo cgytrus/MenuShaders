@@ -172,18 +172,25 @@ struct Shader {
 };
 
 float shaderTime = 0.f;
+GLint shaderFrame = 0;
 class ShaderNode : public CCNode {
     Shader m_shader;
     GLuint m_vao = 0;
     GLuint m_vbo = 0;
     GLint m_uniformResolution = 0;
+    GLint m_uniformResolutionShadertoy = 0;
     GLint m_uniformTime = 0;
+    GLint m_uniformDeltaTime = 0;
+    GLint m_uniformFrameRate = 0;
+    GLint m_uniformFrame = 0;
     GLint m_uniformMouse = 0;
+    GLint m_uniformMouseShadertoy = 0;
     GLint m_uniformPulse1 = 0;
     GLint m_uniformPulse2 = 0;
     GLint m_uniformPulse3 = 0;
     GLint m_uniformFft = 0;
     std::vector<std::tuple<std::string, CCNode*, GLint, GLint, GLint, GLint, GLint>> m_uniformNodes;
+    float m_deltaTime = 0.f;
     FMOD::DSP* m_fftDsp = nullptr;
     static constexpr int FFT_SPECTRUM_SIZE = 1024;
     // gd cuts frequencies higher than ~16kHz, so we should too (the "140/512" part)
@@ -301,8 +308,27 @@ public:
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         m_uniformResolution = glGetUniformLocation(m_shader.program, "resolution");
+        m_uniformResolutionShadertoy = glGetUniformLocation(m_shader.program, "iResolution");
+
         m_uniformTime = glGetUniformLocation(m_shader.program, "time");
+        if (m_uniformTime == -1)
+            m_uniformTime = glGetUniformLocation(m_shader.program, "iTime");
+
+        m_uniformDeltaTime = glGetUniformLocation(m_shader.program, "deltaTime");
+        if (m_uniformDeltaTime == -1)
+            m_uniformDeltaTime = glGetUniformLocation(m_shader.program, "iTimeDelta");
+
+        m_uniformFrameRate = glGetUniformLocation(m_shader.program, "frameRate");
+        if (m_uniformFrameRate == -1)
+            m_uniformFrameRate = glGetUniformLocation(m_shader.program, "iFrameRate");
+
+        m_uniformFrame = glGetUniformLocation(m_shader.program, "frame");
+        if (m_uniformFrame == -1)
+            m_uniformFrame = glGetUniformLocation(m_shader.program, "iFrame");
+
         m_uniformMouse = glGetUniformLocation(m_shader.program, "mouse");
+        m_uniformMouseShadertoy = glGetUniformLocation(m_shader.program, "iMouse");
+
         m_uniformPulse1 = glGetUniformLocation(m_shader.program, "pulse1");
         m_uniformPulse2 = glGetUniformLocation(m_shader.program, "pulse2");
         m_uniformPulse3 = glGetUniformLocation(m_shader.program, "pulse3");
@@ -324,7 +350,9 @@ public:
     }
 
     void update(float dt) override {
+        m_deltaTime = dt;
         shaderTime += dt;
+        shaderFrame++;
         m_spectrumUpdateAccumulator += dt;
 
         const float speed = 1.f / FFT_UPDATE_FREQUENCY;
@@ -378,8 +406,10 @@ public:
         auto frSize = glv->getFrameSize() * geode::utils::getDisplayFactor();
 
         glUniform2f(m_uniformResolution, frSize.width, frSize.height);
+        glUniform3f(m_uniformResolutionShadertoy, frSize.width, frSize.height, 0.f);
         auto mousePos = cocos::getMousePos() / winSize * frSize;
         glUniform2f(m_uniformMouse, mousePos.x, mousePos.y);
+        glUniform4f(m_uniformMouseShadertoy, mousePos.x, mousePos.y, 0.f, 0.f);
 
         for (size_t i = 0; i < m_shaderSprites.size(); ++i) {
             auto sprite = m_shaderSprites[i];
@@ -387,6 +417,9 @@ public:
         }
 
         glUniform1f(m_uniformTime, shaderTime);
+        glUniform1f(m_uniformDeltaTime, m_deltaTime);
+        glUniform1f(m_uniformFrameRate, 1.f / m_deltaTime);
+        glUniform1i(m_uniformFrame, shaderFrame);
 
         // thx adaf for telling me where these are
         auto engine = FMODAudioEngine::sharedEngine();
@@ -441,13 +474,16 @@ public:
                 (std::string)CCFileUtils::get()->fullPathForFilename("any-vert.glsl"_spr, false);
         }
 
+        bool shouldPatch = false;
         std::filesystem::path fragmentPath =
             (std::string)CCFileUtils::get()->fullPathForFilename(Mod::get()->expandSpriteName(name + "-frag.glsl").data(), false);
         if (!std::filesystem::exists(fragmentPath)) {
+            shouldPatch = true;
             fragmentPath =
                 (std::string)CCFileUtils::get()->fullPathForFilename("menu-shader.fsh", false);
         }
         if (!std::filesystem::exists(fragmentPath)) {
+            shouldPatch = false;
             fragmentPath =
                 (std::string)CCFileUtils::get()->fullPathForFilename("any-frag.glsl"_spr, false);
         }
@@ -457,12 +493,41 @@ public:
             return Err("failed to read vertex shader at path {}: {}", vertexPath.string(),
                 vertexSource.unwrapErr());
 
-        auto fragmentSource = file::readString(fragmentPath);
-        if (!fragmentSource)
+        auto fragmentSourceRes = file::readString(fragmentPath);
+        if (!fragmentSourceRes)
             return Err("failed to read fragment shader at path {}: {}", fragmentPath.string(),
-                vertexSource.unwrapErr());
+                fragmentSourceRes.unwrapErr());
+        auto fragmentSource = fragmentSourceRes.unwrap();
 
-        auto shader = ShaderNode::create(vertexSource.unwrap(), fragmentSource.unwrap());
+        if (shouldPatch) {
+            // shadertoy
+            if (auto match = ctre::multiline_search<R"((void\s+main)Image(\s*\(\s*)out\s+vec4\s+([A-Za-z_][A-Za-z0-9_]+)\s*,\s*in\s+vec2\s+([A-Za-z_][A-Za-z0-9_]+)(\s*\)))">(fragmentSource)) {
+                // mainImage to main
+                auto str = fmt::format(
+                    "#define {} gl_FragCoord.xy\n#define {} gl_FragColor\n{}{}{}",
+                    match.get<4>().str(), match.get<3>().str(),
+                    match.get<1>().str(), match.get<2>().str(), match.get<5>().str()
+                );
+                fragmentSource.replace(match.get<0>().begin(), match.get<0>().end(), str);
+
+                // uniforms
+                // iChannelTime, iChannelResolution, iChanneli and iDate are not supported
+                fragmentSource =
+                    "uniform vec3 iResolution;\n"
+                    "uniform float iTime;\n"
+                    "uniform float iTimeDelta;\n"
+                    "uniform float iFrameRate;\n"
+                    "uniform int iFrame;\n"
+                    "uniform vec4 iMouse;\n"
+                    + fragmentSource;
+            }
+            else {
+                // https://github.com/cgytrus/MenuShaders/issues/5 fix
+                fragmentSource = "#define gl_FragCoord gl_FragCoord.xy\n" + fragmentSource;
+            }
+        }
+
+        auto shader = ShaderNode::create(vertexSource.unwrap(), fragmentSource);
         if (!shader)
             return Err("failed to create shader node");
         return Ok(shader);
