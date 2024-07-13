@@ -1,3 +1,10 @@
+## v1.3.0
+- improved logging
+- added built-in shadertoy compatibility
+- built-in fix for issue #5
+- now recommends texture loader
+- updated documentation (hoping to see shader devs make use of these features !!)
+
 ## v1.2.1
 - updated to 2.206
 
