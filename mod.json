@@ -1,5 +1,5 @@
 {
-    "geode": "3.2.0",
+    "geode": "3.7.2",
     "version": "v1.3.0",
     "gd": {
         "win": "2.206",
@@ -9,7 +9,7 @@
     "id": "cgytrus.menu-shaders",
     "name": "Menu Shaders",
     "developers": [ "mat", "ConfiG", "rooot" ],
-    "description": "Replaces the background of the main menu with a custom shader, which can be customized.",
+    "description": "Replaces the background of the main menu with a customizable shader.",
     "repository": "https://github.com/cgytrus/MenuShaders",
     "issues": {
         "info": "Report any issues you have on GitHub issues.",
