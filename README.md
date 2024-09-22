@@ -1,5 +1,5 @@
 # Menu Shaders
-Replaces the background of the main menu with a custom shader.
+Replaces the background of the main menu with a customizable shader.
 
 This is a port of mat's [Menu Shaders](https://github.com/matcool/small-gd-mods/blob/3e1783c7e281cbbccd53f9c4ceb697d5a6f839dd/src/menu-shaders.cpp) mod.
 
