@@ -24,7 +24,7 @@
     "dependencies": [
         {
             "id": "geode.node-ids",
-            "version": ">=v1.12.0",
+            "version": ">=v1.14.1",
             "importance": "required"
         },
         {
@@ -46,11 +46,30 @@
             "type": "bool",
             "default": false
         },
+        "level-select-hide-corners": {
+            "name": "Hide corners in level select menu",
+            "description": "Also hides the bar at the top",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-level-select"
+        },
+        "level-select-hide-ground": {
+            "name": "Hide ground in level select menu",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-level-select"
+        },
         "show-creator": {
             "name": "Show in creator menu",
             "description": "CreatorLayer",
             "type": "bool",
             "default": false
+        },
+        "creator-hide-corners": {
+            "name": "Hide corners in creator menu",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-creator"
         },
         "show-level-browser": {
             "name": "Show in level lists",
@@ -58,11 +77,30 @@
             "type": "bool",
             "default": false
         },
+        "level-browser-hide-corners": {
+            "name": "Hide corners in level lists",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-level-browser"
+        },
         "show-edit-level": {
             "name": "Show in edit level menu",
             "description": "EditLevelLayer",
             "type": "bool",
             "default": false
+        },
+        "edit-level-hide-corners": {
+            "name": "Hide corners in edit level menu",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-edit-level"
+        },
+        "edit-level-hide-backgrounds": {
+            "name": "Hide backgrounds in edit level menu",
+            "description": "Hides the backgrounds under level name and description inputs",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-edit-level"
         },
         "show-play-level": {
             "name": "Show in play level menu",
@@ -70,11 +108,30 @@
             "type": "bool",
             "default": false
         },
+        "play-level-hide-corners": {
+            "name": "Hide corners in play level menu",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-play-level"
+        },
         "show-search": {
             "name": "Show in search menu",
             "description": "LevelSearchLayer",
             "type": "bool",
             "default": false
+        },
+        "search-hide-corners": {
+            "name": "Hide corners in search menu",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-search"
+        },
+        "search-hide-backgrounds": {
+            "name": "Hide backgrounds in search menu",
+            "description": "Hides the backgrounds under query input, difficulty selector, etc.",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-search"
         }
     }
 }

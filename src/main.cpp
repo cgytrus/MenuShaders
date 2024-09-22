@@ -577,12 +577,14 @@ class $modify(LevelSelectLayer) {
             return false;
         if (!ShaderNode::tryAddToNode(this, "level-select", -2))
             return true;
-        for (const auto& child : CCArrayExt<CCNode*>(this->getChildren())) {
-            auto sprite = typeinfo_cast<CCSprite*>(child);
-            if (sprite && sprite->getZOrder() <= 1)
-                sprite->setVisible(false);
-            if (auto ground = typeinfo_cast<GJGroundLayer*>(child))
-                ground->setVisible(false);
+        this->getChildByID("background")->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("level-select-hide-corners")) {
+            this->getChildByID("bottom-left-corner")->setVisible(false);
+            this->getChildByID("bottom-right-corner")->setVisible(false);
+            this->getChildByID("top-bar-sprite")->setVisible(false);
+        }
+        if (Mod::get()->getSettingValue<bool>("level-select-hide-ground")) {
+            this->getChildByID("ground-layer")->setVisible(false);
         }
         return true;
     }
@@ -596,10 +598,9 @@ class $modify(CreatorLayer) {
         if (!ShaderNode::tryAddToNode(this, "creator", -2))
             return true;
         this->getChildByID("background")->setVisible(false);
-        for (const auto& child : CCArrayExt<CCNode*>(this->getChildren())) {
-            auto sprite = typeinfo_cast<CCSprite*>(child);
-            if (sprite && (sprite->getZOrder() == -1 || sprite->getZOrder() == 1))
-                sprite->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("creator-hide-corners")) {
+            this->getChildByID("top-left-corner")->setVisible(false);
+            this->getChildByID("bottom-left-corner")->setVisible(false);
         }
         return true;
     }
@@ -612,10 +613,10 @@ class $modify(LevelBrowserLayer) {
             return false;
         if (!ShaderNode::tryAddToNode(this, "level-browser", -2))
             return true;
-        for (const auto& child : CCArrayExt<CCNode*>(this->getChildren())) {
-            auto sprite = typeinfo_cast<CCSprite*>(child);
-            if (sprite && (sprite->getZOrder() < 0 || sprite->getZOrder() == 1))
-                sprite->setVisible(false);
+        this->getChildByID("background")->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("level-browser-hide-corners")) {
+            this->getChildByID("left-corner")->setVisible(false);
+            this->getChildByID("right-corner")->setVisible(false);
         }
         return true;
     }
@@ -629,10 +630,14 @@ class $modify(EditLevelLayer) {
         if (!ShaderNode::tryAddToNode(this, "edit-level", -2))
             return true;
         this->getChildByID("background")->setVisible(false);
-        this->getChildByID("bottom-left-art")->setVisible(false);
-        this->getChildByID("bottom-right-art")->setVisible(false);
-        this->getChildByID("level-name-background")->setVisible(false);
-        this->getChildByID("description-background")->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("edit-level-hide-corners")) {
+            this->getChildByID("bottom-left-art")->setVisible(false);
+            this->getChildByID("bottom-right-art")->setVisible(false);
+        }
+        if (Mod::get()->getSettingValue<bool>("edit-level-hide-backgrounds")) {
+            this->getChildByID("level-name-background")->setVisible(false);
+            this->getChildByID("description-background")->setVisible(false);
+        }
         return true;
     }
 };
@@ -645,8 +650,10 @@ class $modify(LevelInfoLayer) {
         if (!ShaderNode::tryAddToNode(this, "play-level", -2))
             return true;
         this->getChildByID("background")->setVisible(false);
-        this->getChildByID("bottom-left-art")->setVisible(false);
-        this->getChildByID("bottom-right-art")->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("play-level-hide-corners")) {
+            this->getChildByID("bottom-left-art")->setVisible(false);
+            this->getChildByID("bottom-right-art")->setVisible(false);
+        }
         return true;
     }
 };
@@ -659,13 +666,17 @@ class $modify(LevelSearchLayer) {
         if (!ShaderNode::tryAddToNode(this, "search", -3))
             return true;
         this->getChildByID("background")->setVisible(false);
-        this->getChildByID("left-corner")->setVisible(false);
-        this->getChildByID("right-corner")->setVisible(false);
-        this->getChildByID("level-search-bg")->setVisible(false);
-        this->getChildByID("level-search-bar-bg")->setVisible(false);
-        this->getChildByID("quick-search-bg")->setVisible(false);
-        this->getChildByID("difficulty-filters-bg")->setVisible(false);
-        this->getChildByID("length-filters-bg")->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("search-hide-corners")) {
+            this->getChildByID("left-corner")->setVisible(false);
+            this->getChildByID("right-corner")->setVisible(false);
+        }
+        if (Mod::get()->getSettingValue<bool>("search-hide-backgrounds")) {
+            this->getChildByID("level-search-bg")->setVisible(false);
+            this->getChildByID("level-search-bar-bg")->setVisible(false);
+            this->getChildByID("quick-search-bg")->setVisible(false);
+            this->getChildByID("difficulty-filters-bg")->setVisible(false);
+            this->getChildByID("length-filters-bg")->setVisible(false);
+        }
         return true;
     }
 };
