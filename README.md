@@ -19,7 +19,8 @@ This mod also supports some Shadertoy shaders, to use them:
 You can also replace shaders in `cgytrus.menu-shaders/any-frag.glsl` and `any-vert.glsl`
 for the fragment and vertex shaders respectively,
 where `any` can be replaced with either `main`, `level-select`, `creator`, `level-browser`,
-`edit-level`, `play-level` or `search` to override the shader only for the respective menu.
+`edit-level`, `play-level`, `search`, `garage`, `leaderboards`,
+`gauntlets`, `gauntlet` or `treasure-room` to override the shader only for the respective menu.
 
 Shadertoy compatibility is disabled in these shaders.
 
