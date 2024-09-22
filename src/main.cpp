@@ -680,3 +680,88 @@ class $modify(LevelSearchLayer) {
         return true;
     }
 };
+
+#include <Geode/modify/GJGarageLayer.hpp>
+class $modify(GJGarageLayer) {
+    bool init() {
+        if (!GJGarageLayer::init())
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "garage", -2))
+            return true;
+        this->getChildByID("background")->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("garage-hide-corners")) {
+            this->getChildByID("top-left-corner")->setVisible(false);
+            this->getChildByID("bottom-left-corner")->setVisible(false);
+            this->getChildByID("bottom-right-corner")->setVisible(false);
+        }
+        if (Mod::get()->getSettingValue<bool>("garage-hide-backgrounds")) {
+            this->getChildByID("select-background")->setVisible(false);
+        }
+        return true;
+    }
+};
+
+#include <Geode/modify/LeaderboardsLayer.hpp>
+class $modify(LeaderboardsLayer) {
+    bool init(LeaderboardState p0) {
+        if (!LeaderboardsLayer::init(p0))
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "leaderboards", -2))
+            return true;
+        this->getChildByID("background")->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("leaderboards-hide-corners")) {
+            this->getChildByID("bottom-left-art")->setVisible(false);
+            this->getChildByID("bottom-right-art")->setVisible(false);
+        }
+        return true;
+    }
+};
+
+#include <Geode/modify/GauntletSelectLayer.hpp>
+class $modify(GauntletSelectLayer) {
+    bool init(int p0) {
+        if (!GauntletSelectLayer::init(p0))
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "gauntlets", -2))
+            return true;
+        this->getChildByID("background")->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("gauntlets-hide-corners")) {
+            this->getChildByID("bottom-left-corner")->setVisible(false);
+            this->getChildByID("bottom-right-corner")->setVisible(false);
+            this->getChildByID("top-left-corner")->setVisible(false);
+            this->getChildByID("top-right-corner")->setVisible(false);
+        }
+        return true;
+    }
+};
+
+#include <Geode/modify/GauntletLayer.hpp>
+class $modify(GauntletLayer) {
+    bool init(GauntletType p0) {
+        if (!GauntletLayer::init(p0))
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "gauntlet", -1))
+            return true;
+        this->getChildByID("background")->setVisible(false);
+        return true;
+    }
+};
+
+#include <Geode/modify/SecretRewardsLayer.hpp>
+class $modify(SecretRewardsLayer) {
+    bool init(bool p0) {
+        if (!SecretRewardsLayer::init(p0))
+            return false;
+        if (!ShaderNode::tryAddToNode(this, "treasure-room", -3))
+            return true;
+        this->getChildByID("background")->setVisible(false);
+        if (Mod::get()->getSettingValue<bool>("treasure-room-hide-corners")) {
+            this->getChildByID("top-left-art")->setVisible(false);
+            this->getChildByID("top-right-art")->setVisible(false);
+        }
+        if (Mod::get()->getSettingValue<bool>("treasure-room-hide-floor")) {
+            this->getChildByID("floor")->setVisible(false);
+        }
+        return true;
+    }
+};

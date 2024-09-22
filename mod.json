@@ -132,6 +132,73 @@
             "type": "bool",
             "default": true,
             "enable-if": "show-search"
+        },
+        "show-garage": {
+            "name": "Show in garage (icon select) menu",
+            "description": "GJGarageLayer",
+            "type": "bool",
+            "default": false
+        },
+        "garage-hide-corners": {
+            "name": "Hide corners in garage menu",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-garage"
+        },
+        "garage-hide-backgrounds": {
+            "name": "Hide backgrounds in garage menu",
+            "description": "Hides the black background under the icon selector",
+            "type": "bool",
+            "default": false,
+            "enable-if": "show-garage"
+        },
+        "show-leaderboards": {
+            "name": "Show in leaderboards menu",
+            "description": "LeaderboardsLayer",
+            "type": "bool",
+            "default": false
+        },
+        "leaderboards-hide-corners": {
+            "name": "Hide corners in leaderboards menu",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-leaderboards"
+        },
+        "show-gauntlets": {
+            "name": "Show in gauntlet selection menu",
+            "description": "GauntletSelectLayer",
+            "type": "bool",
+            "default": false
+        },
+        "gauntlets-hide-corners": {
+            "name": "Hide corners in gauntlet selection menu",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-gauntlets"
+        },
+        "show-gauntlet": {
+            "name": "Show in gauntlet menus",
+            "description": "GauntletLayer",
+            "type": "bool",
+            "default": false
+        },
+        "show-treasure-room": {
+            "name": "Show in The Treasure Room",
+            "description": "SecretRewardsLayer",
+            "type": "bool",
+            "default": false
+        },
+        "treasure-room-hide-corners": {
+            "name": "Hide corners in The Treasure Room",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-treasure-room"
+        },
+        "treasure-room-hide-floor": {
+            "name": "Hide floor in The Treasure Room",
+            "type": "bool",
+            "default": true,
+            "enable-if": "show-treasure-room"
         }
     }
 }
