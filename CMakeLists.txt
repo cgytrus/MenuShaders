@@ -28,5 +28,5 @@ elseif(ANDROID)
     target_link_libraries(${PROJECT_NAME} GLESv2)
 endif()
 
-CPMAddPackage("gh:hanickadot/compile-time-regular-expressions#acb2f4d")
+CPMAddPackage("gh:hanickadot/compile-time-regular-expressions#eb9577a")
 target_link_libraries(${PROJECT_NAME} ctre)
