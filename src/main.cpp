@@ -550,7 +550,26 @@ public:
         node->addChild(shader);
         return true;
     }
+
+    static bool tryReplaceBackgroundInLayer(CCLayer* layer, const std::string& name) {
+        auto bg = layer->getChildByID("background");
+        if (!bg)
+            return false;
+        if (!tryAddToNode(layer, name, bg->getZOrder()))
+            return false;
+        bg->setVisible(false);
+        return true;
+    }
 };
+
+void tryHideChild(CCNode* parent, std::string const& id) {
+    if (!parent)
+        return;
+    CCNode* node = parent->getChildByID(id);
+    if (!node)
+        return;
+    node->setVisible(false);
+}
 
 #include <Geode/modify/MenuLayer.hpp>
 class $modify(MenuLayer) {
@@ -575,16 +594,15 @@ class $modify(LevelSelectLayer) {
     bool init(int lvl) {
         if (!LevelSelectLayer::init(lvl))
             return false;
-        if (!ShaderNode::tryAddToNode(this, "level-select", -2))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "level-select"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("level-select-hide-corners")) {
-            this->getChildByID("bottom-left-corner")->setVisible(false);
-            this->getChildByID("bottom-right-corner")->setVisible(false);
-            this->getChildByID("top-bar-sprite")->setVisible(false);
+            tryHideChild(this, "bottom-left-corner");
+            tryHideChild(this, "bottom-right-corner");
+            tryHideChild(this, "top-bar-sprite");
         }
         if (Mod::get()->getSettingValue<bool>("level-select-hide-ground")) {
-            this->getChildByID("ground-layer")->setVisible(false);
+            tryHideChild(this, "ground-layer");
         }
         return true;
     }
@@ -595,12 +613,11 @@ class $modify(CreatorLayer) {
     bool init() {
         if (!CreatorLayer::init())
             return false;
-        if (!ShaderNode::tryAddToNode(this, "creator", -2))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "creator"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("creator-hide-corners")) {
-            this->getChildByID("top-left-corner")->setVisible(false);
-            this->getChildByID("bottom-left-corner")->setVisible(false);
+            tryHideChild(this, "top-left-corner");
+            tryHideChild(this, "bottom-left-corner");
         }
         return true;
     }
@@ -611,12 +628,11 @@ class $modify(LevelBrowserLayer) {
     bool init(GJSearchObject* search) {
         if (!LevelBrowserLayer::init(search))
             return false;
-        if (!ShaderNode::tryAddToNode(this, "level-browser", -2))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "level-browser"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("level-browser-hide-corners")) {
-            this->getChildByID("left-corner")->setVisible(false);
-            this->getChildByID("right-corner")->setVisible(false);
+            tryHideChild(this, "left-corner");
+            tryHideChild(this, "right-corner");
         }
         return true;
     }
@@ -627,16 +643,15 @@ class $modify(EditLevelLayer) {
     bool init(GJGameLevel* level) {
         if (!EditLevelLayer::init(level))
             return false;
-        if (!ShaderNode::tryAddToNode(this, "edit-level", -2))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "edit-level"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("edit-level-hide-corners")) {
-            this->getChildByID("bottom-left-art")->setVisible(false);
-            this->getChildByID("bottom-right-art")->setVisible(false);
+            tryHideChild(this, "bottom-left-art");
+            tryHideChild(this, "bottom-right-art");
         }
         if (Mod::get()->getSettingValue<bool>("edit-level-hide-backgrounds")) {
-            this->getChildByID("level-name-background")->setVisible(false);
-            this->getChildByID("description-background")->setVisible(false);
+            tryHideChild(this, "level-name-background");
+            tryHideChild(this, "description-background");
         }
         return true;
     }
@@ -647,12 +662,11 @@ class $modify(LevelInfoLayer) {
     bool init(GJGameLevel* level, bool a) {
         if (!LevelInfoLayer::init(level, a))
             return false;
-        if (!ShaderNode::tryAddToNode(this, "play-level", -2))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "play-level"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("play-level-hide-corners")) {
-            this->getChildByID("bottom-left-art")->setVisible(false);
-            this->getChildByID("bottom-right-art")->setVisible(false);
+            tryHideChild(this, "bottom-left-art");
+            tryHideChild(this, "bottom-right-art");
         }
         return true;
     }
@@ -663,19 +677,18 @@ class $modify(LevelSearchLayer) {
     bool init(int a) {
         if (!LevelSearchLayer::init(a))
             return false;
-        if (!ShaderNode::tryAddToNode(this, "search", -3))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "search"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("search-hide-corners")) {
-            this->getChildByID("left-corner")->setVisible(false);
-            this->getChildByID("right-corner")->setVisible(false);
+            tryHideChild(this, "left-corner");
+            tryHideChild(this, "right-corner");
         }
         if (Mod::get()->getSettingValue<bool>("search-hide-backgrounds")) {
-            this->getChildByID("level-search-bg")->setVisible(false);
-            this->getChildByID("level-search-bar-bg")->setVisible(false);
-            this->getChildByID("quick-search-bg")->setVisible(false);
-            this->getChildByID("difficulty-filters-bg")->setVisible(false);
-            this->getChildByID("length-filters-bg")->setVisible(false);
+            tryHideChild(this, "level-search-bg");
+            tryHideChild(this, "level-search-bar-bg");
+            tryHideChild(this, "quick-search-bg");
+            tryHideChild(this, "difficulty-filters-bg");
+            tryHideChild(this, "length-filters-bg");
         }
         return true;
     }
@@ -686,16 +699,15 @@ class $modify(GJGarageLayer) {
     bool init() {
         if (!GJGarageLayer::init())
             return false;
-        if (!ShaderNode::tryAddToNode(this, "garage", -2))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "garage"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("garage-hide-corners")) {
-            this->getChildByID("top-left-corner")->setVisible(false);
-            this->getChildByID("bottom-left-corner")->setVisible(false);
-            this->getChildByID("bottom-right-corner")->setVisible(false);
+            tryHideChild(this, "top-left-corner");
+            tryHideChild(this, "bottom-left-corner");
+            tryHideChild(this, "bottom-right-corner");
         }
         if (Mod::get()->getSettingValue<bool>("garage-hide-backgrounds")) {
-            this->getChildByID("select-background")->setVisible(false);
+            tryHideChild(this, "select-background");
         }
         return true;
     }
@@ -706,12 +718,11 @@ class $modify(LeaderboardsLayer) {
     bool init(LeaderboardState p0) {
         if (!LeaderboardsLayer::init(p0))
             return false;
-        if (!ShaderNode::tryAddToNode(this, "leaderboards", -2))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "leaderboards"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("leaderboards-hide-corners")) {
-            this->getChildByID("bottom-left-art")->setVisible(false);
-            this->getChildByID("bottom-right-art")->setVisible(false);
+            tryHideChild(this, "bottom-left-art");
+            tryHideChild(this, "bottom-right-art");
         }
         return true;
     }
@@ -722,14 +733,13 @@ class $modify(GauntletSelectLayer) {
     bool init(int p0) {
         if (!GauntletSelectLayer::init(p0))
             return false;
-        if (!ShaderNode::tryAddToNode(this, "gauntlets", -2))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "gauntlets"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("gauntlets-hide-corners")) {
-            this->getChildByID("bottom-left-corner")->setVisible(false);
-            this->getChildByID("bottom-right-corner")->setVisible(false);
-            this->getChildByID("top-left-corner")->setVisible(false);
-            this->getChildByID("top-right-corner")->setVisible(false);
+            tryHideChild(this, "bottom-left-corner");
+            tryHideChild(this, "bottom-right-corner");
+            tryHideChild(this, "top-left-corner");
+            tryHideChild(this, "top-right-corner");
         }
         return true;
     }
@@ -740,9 +750,7 @@ class $modify(GauntletLayer) {
     bool init(GauntletType p0) {
         if (!GauntletLayer::init(p0))
             return false;
-        if (!ShaderNode::tryAddToNode(this, "gauntlet", -1))
-            return true;
-        this->getChildByID("background")->setVisible(false);
+        ShaderNode::tryReplaceBackgroundInLayer(this, "gauntlet");
         return true;
     }
 };
@@ -752,15 +760,14 @@ class $modify(SecretRewardsLayer) {
     bool init(bool p0) {
         if (!SecretRewardsLayer::init(p0))
             return false;
-        if (!ShaderNode::tryAddToNode(this, "treasure-room", -3))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "treasure-room"))
             return true;
-        this->getChildByID("background")->setVisible(false);
         if (Mod::get()->getSettingValue<bool>("treasure-room-hide-corners")) {
-            this->getChildByID("top-left-art")->setVisible(false);
-            this->getChildByID("top-right-art")->setVisible(false);
+            tryHideChild(this, "top-left-art");
+            tryHideChild(this, "top-right-art");
         }
         if (Mod::get()->getSettingValue<bool>("treasure-room-hide-floor")) {
-            this->getChildByID("floor")->setVisible(false);
+            tryHideChild(this, "floor");
         }
         return true;
     }
