@@ -1,3 +1,6 @@
+## v1.4.1
+- fixed crash in menus without a background that normally have one
+
 ## v1.4.0
 - made hiding corners, input backgrounds, etc. configurable
   - tho it Will Not look good unless you use happy textures or smth to change the colors i guess
