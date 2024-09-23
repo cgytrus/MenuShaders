@@ -1,5 +1,6 @@
 ## v1.4.1
 - fixed crash in menus without a background that normally have one
+- potentially improved compatibility with other mods changing the main menu background
 
 ## v1.4.0
 - made hiding corners, input backgrounds, etc. configurable
