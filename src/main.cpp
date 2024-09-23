@@ -553,9 +553,14 @@ public:
 
     static bool tryReplaceBackgroundInLayer(CCLayer* layer, const std::string& name) {
         auto bg = layer->getChildByID("background");
+        int zOrder = -10;
+        if (!bg)
+            bg = layer->getChildByID("main-menu-bg");
+        else
+            zOrder = bg->getZOrder();
         if (!bg)
             return false;
-        if (!tryAddToNode(layer, name, bg->getZOrder()))
+        if (!tryAddToNode(layer, name, zOrder))
             return false;
         bg->setVisible(false);
         return true;
@@ -576,15 +581,7 @@ class $modify(MenuLayer) {
     bool init() {
         if (!MenuLayer::init())
             return false;
-        if (!ShaderNode::tryAddToNode(this, "main", -10))
-            return true;
-        for (const auto& child : CCArrayExt<CCNode*>(this->getChildren())) {
-            auto layer = typeinfo_cast<MenuGameLayer*>(child);
-            if (!layer)
-                continue;
-            layer->removeFromParentAndCleanup(true);
-            break;
-        }
+        ShaderNode::tryReplaceBackgroundInLayer(this, "main");
         return true;
     }
 };
