@@ -1,3 +1,6 @@
+## v1.4.2
+- updated to 2.2074
+
 ## v1.4.1
 - fixed crash in menus without a background that normally have one
 - potentially improved compatibility with other mods changing the main menu background
