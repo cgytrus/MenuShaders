@@ -451,7 +451,7 @@ public:
 
         glBindVertexArray(0);
 
-#ifndef GEODE_IS_MACOS
+#if !defined(GEODE_IS_MACOS) && !defined(GEODE_IS_IOS)
         CC_INCREMENT_GL_DRAWS(1);
 #endif
     }
