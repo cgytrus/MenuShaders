@@ -33,7 +33,7 @@ elseif (GEODE_TARGET_PLATFORM STREQUAL "Android64")
 elseif (GEODE_TARGET_PLATFORM STREQUAL "MacOS")
     target_link_libraries(${PROJECT_NAME} "-framework OpenGL -framework Cocoa")
 elseif (GEODE_TARGET_PLATFORM STREQUAL "iOS")
-    target_link_libraries(${PROJECT_NAME} "-framework OpenGLES -framework Cocoa")
+    #target_link_libraries(${PROJECT_NAME} "-framework OpenGLESa")
 endif()
 
 CPMAddPackage("gh:hanickadot/compile-time-regular-expressions#eb9577a")
