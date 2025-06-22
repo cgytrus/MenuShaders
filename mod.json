@@ -1,10 +1,11 @@
 {
     "geode": "4.1.0",
-    "version": "v1.4.2",
+    "version": "v1.4.3",
     "gd": {
         "win": "2.2074",
         "mac": "2.2074",
-        "android": "2.2074"
+        "android": "2.2074",
+        "ios": "2.2074"
     },
     "id": "cgytrus.menu-shaders",
     "name": "Menu Shaders",
@@ -24,7 +25,7 @@
     "dependencies": [
         {
             "id": "geode.node-ids",
-            "version": ">=v1.18.0",
+            "version": ">=v1.21.1",
             "importance": "required"
         },
         {
