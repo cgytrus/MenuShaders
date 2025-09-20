@@ -1,3 +1,8 @@
+## v1.4.4
+- fixed double shader time during layer transitions
+- force enable metering if it's off
+  - fixes issue #25
+
 ## v1.4.3
 - added ios support
 
