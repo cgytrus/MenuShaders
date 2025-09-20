@@ -171,8 +171,8 @@ struct Shader {
     }
 };
 
-float shaderTime = 0.f;
-GLint shaderFrame = 0;
+float s_shaderTime = 0.f;
+GLint s_shaderFrame = 0;
 class ShaderNode : public CCNode {
     Shader m_shader;
     GLuint m_vao = 0;
@@ -191,6 +191,8 @@ class ShaderNode : public CCNode {
     GLint m_uniformFft = 0;
     std::vector<std::tuple<std::string, CCNode*, GLint, GLint, GLint, GLint, GLint>> m_uniformNodes;
     float m_deltaTime = 0.f;
+    float m_time = 0.f;
+    GLint m_frame = 0;
     FMOD::DSP* m_fftDsp = nullptr;
     static constexpr int FFT_SPECTRUM_SIZE = 1024;
     // gd cuts frequencies higher than ~16kHz, so we should too (the "140/512" part)
@@ -350,10 +352,16 @@ public:
     }
 
     void update(float dt) override {
+        if (m_time == 0.f)
+            m_time = s_shaderTime;
+        if (m_frame == 0)
+            m_frame = s_shaderFrame;
         m_deltaTime = dt;
-        shaderTime += dt;
-        shaderFrame++;
+        m_time += dt;
+        m_frame++;
         m_spectrumUpdateAccumulator += dt;
+        s_shaderTime = m_time;
+        s_shaderFrame = m_frame;
 
         const float speed = 1.f / FFT_UPDATE_FREQUENCY;
         if (m_spectrumUpdateAccumulator >= speed) {
@@ -416,10 +424,10 @@ public:
             ccGLBindTexture2DN(i, sprite->getTexture()->getName());
         }
 
-        glUniform1f(m_uniformTime, shaderTime);
+        glUniform1f(m_uniformTime, m_time);
         glUniform1f(m_uniformDeltaTime, m_deltaTime);
         glUniform1f(m_uniformFrameRate, 1.f / m_deltaTime);
-        glUniform1i(m_uniformFrame, shaderFrame);
+        glUniform1i(m_uniformFrame, m_frame);
 
         // thx adaf for telling me where these are
         auto engine = FMODAudioEngine::sharedEngine();
@@ -535,14 +543,16 @@ public:
 
     static bool tryAddToNode(CCNode* node, const std::string& name, int zOrder) {
         if (!Mod::get()->getSettingValue<bool>("show-" + name)) {
-            shaderTime = 0.f;
+            s_shaderTime = 0.f;
+            s_shaderFrame = 0;
             return false;
         }
 
         auto res = ShaderNode::createWithMenuName(name);
         if (!res) {
             log::error("Failed to load menu shader: {}", res.unwrapErr());
-            shaderTime = 0.f;
+            s_shaderTime = 0.f;
+            s_shaderFrame = 0;
             return false;
         }
         auto shader = res.unwrap();
