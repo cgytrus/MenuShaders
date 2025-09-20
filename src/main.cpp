@@ -431,6 +431,8 @@ public:
 
         // thx adaf for telling me where these are
         auto engine = FMODAudioEngine::sharedEngine();
+        if (!engine->m_metering)
+            engine->enableMetering();
         glUniform1f(m_uniformPulse1, engine->m_pulse1);
         glUniform1f(m_uniformPulse2, engine->m_pulse2);
         glUniform1f(m_uniformPulse3, engine->m_pulse3);
