@@ -722,10 +722,11 @@ class $modify(GJGarageLayer) {
     }
 };
 
+/*
 #include <Geode/modify/LeaderboardsLayer.hpp>
 class $modify(LeaderboardsLayer) {
-    bool init(LeaderboardState p0) {
-        if (!LeaderboardsLayer::init(p0))
+    bool init() {
+        if (!LeaderboardsLayer::init())
             return false;
         if (!ShaderNode::tryReplaceBackgroundInLayer(this, "leaderboards"))
             return true;
@@ -736,6 +737,7 @@ class $modify(LeaderboardsLayer) {
         return true;
     }
 };
+*/
 
 #include <Geode/modify/GauntletSelectLayer.hpp>
 class $modify(GauntletSelectLayer) {
