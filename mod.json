@@ -1,17 +1,19 @@
 {
-    "geode": "4.8.0",
-    "version": "v1.4.4",
+    "geode": "5.3.0",
+    "version": "v1.4.5",
     "gd": {
-        "win": "2.2074",
-        "mac": "2.2074",
-        "android": "2.2074",
-        "ios": "2.2074"
+        "win": "2.2081",
+        "mac": "2.2081",
+        "android": "2.2081",
+        "ios": "2.2081"
     },
     "id": "cgytrus.menu-shaders",
     "name": "Menu Shaders",
     "developers": [ "mat", "ConfiG", "rooot" ],
     "description": "Replaces the background of the main menu with a customizable shader.",
-    "repository": "https://github.com/cgytrus/MenuShaders",
+    "links": {
+        "source": "https://github.com/cgytrus/MenuShaders"
+    },
     "issues": {
         "info": "Report any issues you have on GitHub issues.",
         "url": "https://github.com/cgytrus/MenuShaders/issues"
@@ -22,18 +24,10 @@
             "resources/shaders/*.glsl"
         ]
     },
-    "dependencies": [
-        {
-            "id": "geode.node-ids",
-            "version": ">=v1.21.1",
-            "importance": "required"
-        },
-        {
-            "id": "geode.texture-loader",
-            "version": "*",
-            "importance": "recommended"
-        }
-    ],
+    "dependencies": {
+        "geode.node-ids": { "version": ">=v1.21.1", "required": true },
+        "geode.texture-loader": { "version": "*", "required": false }
+    },
     "settings": {
         "show-main": {
             "name": "Show in main menu",
