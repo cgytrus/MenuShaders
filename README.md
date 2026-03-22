@@ -13,6 +13,10 @@ This mod also supports some Shadertoy shaders, to use them:
 2. Copy/paste the code on the right into your menu-shader.fsh
 3. If you see the default GD background and errors from Menu Shaders in the console, that likely means that the shader you want to use is incompatible.
 
+## Credits
+- [mat](https://github.com/matcool) - original mod for 2.1
+- [rooot](https://github.com/RoootTheFox) - some of the ports during 2.2
+
 ## Advanced Usage
 
 ### New shader locations
