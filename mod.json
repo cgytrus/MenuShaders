@@ -1,11 +1,11 @@
 {
-    "geode": "4.8.0",
+    "geode": "5.4.0",
     "version": "v1.4.4",
     "gd": {
-        "win": "2.2074",
-        "mac": "2.2074",
-        "android": "2.2074",
-        "ios": "2.2074"
+        "win": "2.2081",
+        "mac": "2.2081",
+        "android": "2.2081",
+        "ios": "2.2081"
     },
     "id": "cgytrus.menu-shaders",
     "name": "Menu Shaders",
@@ -22,18 +22,13 @@
             "resources/shaders/*.glsl"
         ]
     },
-    "dependencies": [
-        {
-            "id": "geode.node-ids",
-            "version": ">=v1.21.1",
-            "importance": "required"
-        },
-        {
-            "id": "geode.texture-loader",
+    "dependencies": {
+        "geode.node-ids": ">=v1.21.1",
+        "geode.texture-loader": {
             "version": "*",
-            "importance": "recommended"
+            "required": false
         }
-    ],
+    },
     "settings": {
         "show-main": {
             "name": "Show in main menu",

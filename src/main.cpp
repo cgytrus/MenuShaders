@@ -724,8 +724,8 @@ class $modify(GJGarageLayer) {
 
 #include <Geode/modify/LeaderboardsLayer.hpp>
 class $modify(LeaderboardsLayer) {
-    bool init(LeaderboardState p0) {
-        if (!LeaderboardsLayer::init(p0))
+    bool init(LeaderboardType type, LeaderboardStat stat) {
+        if (!LeaderboardsLayer::init(type, stat))
             return false;
         if (!ShaderNode::tryReplaceBackgroundInLayer(this, "leaderboards"))
             return true;
