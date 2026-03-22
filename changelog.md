@@ -1,3 +1,6 @@
+## v1.4.5
+- updated to 2.2081
+
 ## v1.4.4
 - fixed double shader time during layer transitions
 - force enable metering if it's off
