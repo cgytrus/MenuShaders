@@ -649,12 +649,12 @@ class $modify(LevelBrowserLayer) {
 
 #include <Geode/modify/LevelListLayer.hpp>
 class $modify(LevelListLayer) {
-    bool init(GJLevelList * list) {
+    bool init(GJLevelList* list) {
         if (!LevelListLayer::init(list))
             return false;
-        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "list"))
+        if (!ShaderNode::tryReplaceBackgroundInLayer(this, "level-list"))
             return true;
-        if (Mod::get()->getSettingValue<bool>("list-hide-corners")) {
+        if (Mod::get()->getSettingValue<bool>("level-list-hide-corners")) {
             tryHideChild(this, "left-corner");
             tryHideChild(this, "right-corner");
         }

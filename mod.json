@@ -64,28 +64,28 @@
             "enable-if": "show-creator"
         },
         "show-level-browser": {
-            "name": "Show in level lists",
+            "name": "Show in level browsers",
             "description": "Hall of Fame, Featured, Saved, etc. (LevelBrowserLayer)",
             "type": "bool",
             "default": false
         },
         "level-browser-hide-corners": {
-            "name": "Hide corners in level lists",
+            "name": "Hide corners in level browsers",
             "type": "bool",
             "default": true,
             "enable-if": "show-level-browser"
         },
-        "show-list": {
+        "show-level-list": {
             "name": "Show in level lists",
-            "description": "Level Lists (LevelListLayer)",
+            "description": "Lists (LevelListLayer)",
             "type": "bool",
             "default": false
         },
-        "list-hide-corners": {
+        "level-list-hide-corners": {
             "name": "Hide corners in level lists",
             "type": "bool",
             "default": true,
-            "enable-if": "show-list"
+            "enable-if": "show-level-list"
         },
         "show-edit-level": {
             "name": "Show in edit level menu",
