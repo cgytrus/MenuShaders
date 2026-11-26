@@ -498,12 +498,14 @@ public:
                 (std::string)CCFileUtils::get()->fullPathForFilename("any-frag.glsl"_spr, false);
         }
 
-        auto vertexSource = file::readString(vertexPath);
+        auto vertexPathString = vertexPath.string();
+        auto vertexSource = file::readString(vertexPathString);
         if (!vertexSource)
             return Err("failed to read vertex shader at path {}: {}", vertexPath.string(),
                 vertexSource.unwrapErr());
 
-        auto fragmentSourceRes = file::readString(fragmentPath);
+        auto fragmentPathString = fragmentPath.string();
+        auto fragmentSourceRes = file::readString(fragmentPathString);
         if (!fragmentSourceRes)
             return Err("failed to read fragment shader at path {}: {}", fragmentPath.string(),
                 fragmentSourceRes.unwrapErr());
@@ -514,11 +516,11 @@ public:
             if (auto match = ctre::multiline_search<R"((void\s+main)Image(\s*\(\s*)out\s+vec4\s+([A-Za-z_][A-Za-z0-9_]+)\s*,\s*in\s+vec2\s+([A-Za-z_][A-Za-z0-9_]+)(\s*\)))">(fragmentSource)) {
                 // mainImage to main
                 auto str = fmt::format(
-                    "#define {} gl_FragCoord.xy\n#define {} gl_FragColor\n{}{}{}",
-                    match.get<4>().str(), match.get<3>().str(),
-                    match.get<1>().str(), match.get<2>().str(), match.get<5>().str()
-                );
-                fragmentSource.replace(match.get<0>().begin(), match.get<0>().end(), str);
+                "#define {} gl_FragCoord.xy\n#define {} gl_FragColor\n{}{}{}",
+                match.template get<4>().str(), match.template get<3>().str(),
+                match.template get<1>().str(), match.template get<2>().str(), match.template get<5>().str()
+            );
+                fragmentSource.replace(match.template get<0>().begin(), match.template get<0>().end(), str);
 
                 // uniforms
                 // iChannelTime, iChannelResolution, iChanneli and iDate are not supported
