@@ -8,7 +8,7 @@ else()
 endif()
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-project(MenuShaders VERSION 1.4.5)
+project(MenuShaders VERSION 1.4.6)
 
 add_library(${PROJECT_NAME} SHARED
     src/main.cpp

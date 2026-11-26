@@ -46,3 +46,6 @@ Each node in the list will add a few uniforms, where `0` is the index of the spr
 - `vec2 node0Size` - node content size in cocos points in world space
 - `bool node0Visible` - node visibility (whether it's drawn or not)
 
+
+---
+**Unofficial 2.2091 test port (v1.4.6)** — only `mod.json` (Geode 6.0.0, GD 2.2091), the CMake version and the CI workflow (Windows-only) were changed. Original mod by ConfiG, mat and rooot, MIT licensed.
